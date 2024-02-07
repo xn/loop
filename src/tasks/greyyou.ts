@@ -4,18 +4,22 @@ import {
   buy,
   buyUsingStorage,
   cliExecute,
+  closetAmount,
   descToItem,
   getFuel,
   getWorkshed,
   hippyStoneBroken,
   itemAmount,
+  mallPrice,
   myAdventures,
   myAscensions,
   myClass,
+  myFamiliar,
   myLevel,
   myStorageMeat,
   runChoice,
   storageAmount,
+  takeCloset,
   toInt,
   totalTurnsPlayed,
   use,
@@ -26,6 +30,7 @@ import {
   $effect,
   $familiar,
   $item,
+  $items,
   $location,
   $monster,
   $path,
@@ -34,6 +39,7 @@ import {
   AsdonMartin,
   ensureEffect,
   get,
+  getTodaysHolidayWanderers,
   have,
   Lifestyle,
   Macro,
@@ -50,7 +56,7 @@ const gear: Task[] = [
   {
     name: "Pants",
     after: [],
-    completed: () => have($item`pantogram pants`),
+    completed: () => have($item`pantogram pants`) || !have($item`portable pantogram`),
     do: () => {
       if (step("questM05Toot") === -1) visitUrl("council.php");
       if (step("questM05Toot") === 0) visitUrl("tutorial.php?action=toot");
@@ -125,7 +131,7 @@ export const GyouQuest: Quest = {
     },
     {
       name: "Run",
-      after: ["Ascend", "Break Stone", ...gear.map((task) => task.name)],
+      after: ["Ascend", ...gear.map((task) => task.name)],
       completed: () => step("questL13Final") > 11,
       do: () => cliExecute("loopgyou tune=wombat"),
       limit: { tries: 1 },
@@ -143,7 +149,8 @@ export const GyouQuest: Quest = {
         if (have($item`How to Avoid Scams`)) ensureEffect($effect`How to Scam Tourists`);
 
         // Use only the first source terminal enhance, save the others for aftercore
-        if (get("_sourceTerminalEnhanceUses") === 0) SourceTerminal.enhance($effect`meat.enh`);
+        if (SourceTerminal.have() && get("_sourceTerminalEnhanceUses") === 0)
+          SourceTerminal.enhance($effect`meat.enh`);
 
         // Prepare latte
         if (
@@ -187,17 +194,26 @@ export const GyouQuest: Quest = {
         acc1: $item`lucky gold ring`,
         // acc2: $item`mafia pointer finger ring`,
         acc3: $item`mafia thumb ring`,
-        familiar: $familiar`Space Jellyfish`,
+        familiar: $familiar`Hobo Monkey`,
         modifier: "meat",
       },
       combat: new CombatStrategy()
-        .macro(
-          new Macro()
+        .macro(Macro.skill($skill`Infinite Loop`), getTodaysHolidayWanderers())
+        .macro(() =>
+          Macro.tryItem($item`train whistle`)
             .trySkill($skill`Bowl Straight Up`)
-            .skill($skill`Extract Jelly`)
-            .skill($skill`Sing Along`)
-            .skill($skill`Precision Shot`)
-            .skill($skill`Double Nanovision`)
+            .trySkill($skill`Sing Along`)
+            .trySkill($skill`Extract Jelly`)
+            .tryItem($item`porquoise-handled sixgun`)
+            .externalIf(
+              myFamiliar() === $familiar`Hobo Monkey`,
+              Macro.while_(
+                `!match "shoulder, and hands you some Meat." && !pastround 20 && !hppercentbelow 25`,
+                Macro.item($item`seal tooth`)
+              )
+            )
+            .trySkill($skill`Double Nanovision`)
+            .attack()
             .repeat()
         )
         .macro(
@@ -232,7 +248,7 @@ export const GyouQuest: Quest = {
       name: "Level",
       after: ["Ascend", "Prism", "Pull All"],
       completed: () => myClass() !== $class`Grey Goo` && myLevel() >= 13,
-      do: () => cliExecute("loopcasual goal=level"),
+      do: () => cliExecute("levelup targetlevel=13"),
       limit: { tries: 1 },
     },
     {
@@ -247,7 +263,22 @@ export const GyouQuest: Quest = {
       after: ["Ascend", "Prism", "Level", "Pull All"],
       ready: () => have(args.duplicate),
       completed: () => get("lastDMTDuplication") === myAscensions(),
-      prepare: () => set("choiceAdventure1125", `1&iid=${toInt(args.duplicate)}`),
+      prepare: (): void => {
+        let duped = $item`none`;
+        const dupeItems = $items`pickled bread, corned beet, salted mutton, chocomotive, cabooze, freightcake, very fancy whiskey, bottle of Greedy Dog, liquid rhinestones, Daily Affirmation: Always be Collecting, Daily Affirmation: Work For Hours a Week, huge Crimbo cookie, green-iced sweet roll, bottle of Race Car Red, warbear gyro, karma shawarma, bottle of drinkin' gas, abstraction: comprehension, Daily Affirmation: Think Win-Lose, bottle of Old Pugilist`;
+        const dupeVals = Array.from(dupeItems.values()).map((dupe) => {
+          return {
+            dupeIt: dupe,
+            value: mallPrice(dupe),
+          };
+        });
+        const best = dupeVals.sort((a, b) => b.value - a.value)[0];
+        duped = best.dupeIt;
+        if (itemAmount(duped) === 0) {
+          buy(duped, 1);
+        }
+        set("choiceAdventure1125", `1&iid=${toInt(best.dupeIt)}`);
+      },
       do: $location`The Deep Machine Tunnels`,
       choices: { 1119: 4 },
       combat: new CombatStrategy().macro(new Macro().attack().repeat()),

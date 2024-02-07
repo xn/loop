@@ -104,24 +104,10 @@ export function garboAscend(after: string[], garbo: string): Task[] {
       limit: { tries: 1 },
     },
     {
-      name: "Caldera",
-      after: [...after, "Stooper"],
-      acquire: [{ item: $item`heat-resistant sheet metal`, price: 5000, optional: true }],
-      prepare: () => useSkill($skill`Cannelloni Cocoon`),
-      do: $location`The Bubblin' Caldera`,
-      completed: () =>
-        $location`The Bubblin' Caldera`.turnsSpent >= 7 ||
-        $location`The Bubblin' Caldera`.noncombatQueue.includes("Lava Dogs"),
-      combat: new CombatStrategy().macro(new Macro().attack().repeat()),
-      outfit: { modifier: "muscle", familiar: $familiar`Stooper` },
-      limit: { tries: 10 }, // Clear intro adventure
-    },
-    {
       name: "Overdrink",
       after: [...after, "Stooper"],
       do: () => {
-        // drink($item`Schrödinger's thermos`),
-        visitUrl(`inv_booze.php?pwd&which=1&whichitem=${toInt($item`Schrödinger's thermos`)}`);
+        cliExecute("CONSUME NIGHTCAP")
       },
       completed: () => myInebriety() > inebrietyLimit(),
       effects: $effects`Ode to Booze`,

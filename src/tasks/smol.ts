@@ -56,13 +56,7 @@ export const SmolQuest: Quest = {
       after: ["Aftercore/Overdrunk", "Aftercore/Fights", "Legend Pizza"],
       do: (): void => {
         prepareAscension({
-          garden: "packet of tall grass seeds",
           eudora: "Our Daily Candles™ order form",
-          chateau: {
-            desk: "continental juice bar",
-            ceiling: "ceiling fan",
-            nightstand: "electric muscle stimulator",
-          },
         });
 
         ascend({
@@ -90,7 +84,7 @@ export const SmolQuest: Quest = {
       name: "Run",
       after: ["Ascend", "Break Stone"],
       completed: () => step("questL13Final") > 11,
-      do: () => cliExecute("loopsmol"),
+      do: () => cliExecute("loopsmol tune=wombat"),
       limit: { tries: 1 },
       tracking: "Run",
     },

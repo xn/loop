@@ -144,7 +144,7 @@ export function postQuest(runTasks: string[]): Quest {
             use($item`clockwork maid`);
           }
         },
-        outfit: { modifier: "adv", familiar: $familiar`Trick-or-Treating Tot` },
+        outfit: { modifier: "adv", familiar: $familiar`Left-Hand Man` },
         limit: { tries: 1 },
       },
     ],
