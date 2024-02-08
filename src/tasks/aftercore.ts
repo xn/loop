@@ -1,4 +1,3 @@
-import { CombatStrategy } from "grimoire-kolmafia";
 import {
   cliExecute,
   fullnessLimit,
@@ -11,25 +10,9 @@ import {
   mySpleenUse,
   pvpAttacksLeft,
   spleenLimit,
-  toInt,
   use,
-  useSkill,
-  visitUrl,
 } from "kolmafia";
-import {
-  $effect,
-  $effects,
-  $familiar,
-  $item,
-  $items,
-  $location,
-  $skill,
-  get,
-  have,
-  Macro,
-  set,
-  uneffect,
-} from "libram";
+import { $effect, $effects, $familiar, $item, $items, get, have, set, uneffect } from "libram";
 import { args } from "../main";
 import { ascended, isHalloween, Quest, Task } from "./structure";
 
@@ -107,7 +90,7 @@ export function garboAscend(after: string[], garbo: string): Task[] {
       name: "Overdrink",
       after: [...after, "Stooper"],
       do: () => {
-        cliExecute("CONSUME NIGHTCAP")
+        cliExecute("CONSUME NIGHTCAP");
       },
       completed: () => myInebriety() > inebrietyLimit(),
       effects: $effects`Ode to Booze`,

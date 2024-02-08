@@ -5,6 +5,8 @@ import {
   getWorkshed,
   haveEffect,
   inebrietyLimit,
+  itemAmount,
+  mallPrice,
   myAdventures,
   myAscensions,
   myInebriety,
@@ -16,6 +18,7 @@ import {
   $effect,
   $familiar,
   $item,
+  $items,
   $location,
   $skill,
   ChateauMantegna,
@@ -52,8 +55,24 @@ export function postQuest(runTasks: string[]): Quest {
         name: "Duplicate",
         after: runTasks,
         ready: () => have(args.duplicate),
-        completed: () => get("lastDMTDuplication") === myAscensions(),
-        prepare: () => set("choiceAdventure1125", `1&iid=${toInt(args.duplicate)}`),
+        completed: () =>
+          !have($familiar`Machine Elf`) || get("lastDMTDuplication") === myAscensions(),
+        prepare: (): void => {
+          let duped = $item`none`;
+          const dupeItems = $items`pickled bread, corned beet, salted mutton, chocomotive, cabooze, freightcake, very fancy whiskey, bottle of Greedy Dog, liquid rhinestones, Daily Affirmation: Always be Collecting, Daily Affirmation: Work For Hours a Week, huge Crimbo cookie, green-iced sweet roll, bottle of Race Car Red, warbear gyro, karma shawarma, bottle of drinkin' gas, abstraction: comprehension, Daily Affirmation: Think Win-Lose, bottle of Old Pugilist`;
+          const dupeVals = Array.from(dupeItems.values()).map((dupe) => {
+            return {
+              dupeIt: dupe,
+              value: mallPrice(dupe),
+            };
+          });
+          const best = dupeVals.sort((a, b) => b.value - a.value)[0];
+          duped = best.dupeIt;
+          if (itemAmount(duped) === 0) {
+            buy(duped, 1);
+          }
+          set("choiceAdventure1125", `1&iid=${toInt(best.dupeIt)}`);
+        },
         do: $location`The Deep Machine Tunnels`,
         choices: { 1119: 4 },
         combat: new CombatStrategy().macro(new Macro().attack().repeat()),

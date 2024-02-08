@@ -1,11 +1,10 @@
-import { CombatStrategy, step } from "grimoire-kolmafia";
+import { step } from "grimoire-kolmafia";
 import {
   buy,
   cliExecute,
   hippyStoneBroken,
   inebrietyLimit,
   itemAmount,
-  myAscensions,
   myFullness,
   myInebriety,
   myPath,
@@ -13,17 +12,13 @@ import {
   retrieveItem,
   runChoice,
   storageAmount,
-  toInt,
   use,
   useSkill,
   visitUrl,
 } from "kolmafia";
 import {
   $class,
-  $effect,
-  $familiar,
   $item,
-  $location,
   $path,
   $skill,
   ascend,
@@ -32,10 +27,7 @@ import {
   getRemainingStomach,
   have,
   Lifestyle,
-  Macro,
   prepareAscension,
-  set,
-  uneffect,
 } from "libram";
 import { ascended, Quest } from "./structure";
 import { args } from "../main";
@@ -148,21 +140,6 @@ export const SmolQuest: Quest = {
       completed: () => have($skill`Liver of Steel`),
       do: () => cliExecute("loopcasual goal=organ"),
       limit: { tries: 1 },
-    },
-    {
-      name: "Duplicate",
-      after: ["Ascend", "Prism", "Pull All"],
-      ready: () => have(args.duplicate),
-      completed: () => get("lastDMTDuplication") === myAscensions(),
-      prepare: () => set("choiceAdventure1125", `1&iid=${toInt(args.duplicate)}`),
-      do: $location`The Deep Machine Tunnels`,
-      post: (): void => {
-        if (have($effect`Beaten Up`)) uneffect($effect`Beaten Up`);
-      },
-      choices: { 1119: 4 },
-      combat: new CombatStrategy().macro(new Macro().attack().repeat()),
-      outfit: { familiar: $familiar`Machine Elf`, modifier: "muscle" },
-      limit: { tries: 6 },
     },
   ],
 };
