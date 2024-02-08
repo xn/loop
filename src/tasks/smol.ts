@@ -76,7 +76,7 @@ export const SmolQuest: Quest = {
       name: "Run",
       after: ["Ascend", "Break Stone"],
       completed: () => step("questL13Final") > 11,
-      do: () => cliExecute("loopsmol tune=wombat"),
+      do: () => cliExecute("loopsmol"),
       limit: { tries: 1 },
       tracking: "Run",
     },

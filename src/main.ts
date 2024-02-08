@@ -44,6 +44,10 @@ export const args = Args.create("loop", "A script for a full loop.", {
     help: "Value of adventure to use for garbo",
     default: 6700,
   }),
+  tune: Args.string({
+    help: "Moon sign to switch to after breaking prism",
+    default: "wombat",
+  }),
 });
 export function main(command?: string): void {
   Args.fill(args, command);

@@ -52,6 +52,14 @@ export function postQuest(runTasks: string[]): Quest {
         limit: { tries: 1 },
       },
       {
+        name: "Tune Moon",
+        after: runTasks,
+        completed: () =>
+          !have($item`hewn moon-rune spoon`) || args.tune === undefined || get("moonTuned", false),
+        do: () => cliExecute(`spoon ${args.tune}`),
+        limit: { tries: 1 },
+      },
+      {
         name: "Duplicate",
         after: runTasks,
         ready: () => have(args.duplicate),
