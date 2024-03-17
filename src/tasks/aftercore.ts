@@ -1,6 +1,7 @@
 import {
   cliExecute,
   fullnessLimit,
+  getClanName,
   hippyStoneBroken,
   inebrietyLimit,
   myAdventures,
@@ -12,7 +13,18 @@ import {
   spleenLimit,
   use,
 } from "kolmafia";
-import { $effect, $effects, $familiar, $item, $items, get, have, set, uneffect } from "libram";
+import {
+  $effect,
+  $effects,
+  $familiar,
+  $item,
+  $items,
+  Clan,
+  get,
+  have,
+  set,
+  uneffect,
+} from "libram";
 import { args } from "../main";
 import { ascended, isHalloween, Quest, Task } from "./structure";
 
@@ -32,7 +44,7 @@ export function stooperDrunk(): boolean {
   );
 }
 
-export function garboAscend(after: string[], garbo: string): Task[] {
+export function garboAscend(after: string[]): Task[] {
   return [
     {
       name: "Garboween",
@@ -51,9 +63,10 @@ export function garboAscend(after: string[], garbo: string): Task[] {
       after: [...after, "Garboween"],
       completed: () => !isHalloween() || myAdventures() < 5 || stooperDrunk(),
       do: () => {
-        cliExecute("freecandy treatOutfit='Ceramic Suit' familiar='Red-Nosed Snapper'");
+        cliExecute(
+          `freecandy treatOutfit='${args.freecandyOutfit}' familiar='${args.freecandyFamiliar}'`
+        );
       },
-      outfit: { familiar: $familiar`Red-Nosed Snapper` },
       limit: { tries: 1 },
       tracking: "Garbo",
     },
@@ -65,7 +78,7 @@ export function garboAscend(after: string[], garbo: string): Task[] {
         if (have($item`can of Rain-Doh`) && !have($item`Rain-Doh blue balls`))
           use($item`can of Rain-Doh`);
         set("valueOfAdventure", args.voa);
-        cliExecute(garbo);
+        cliExecute(args.garboAscendCmd);
       },
       limit: { tries: 1 },
       tracking: "Garbo",
@@ -80,7 +93,7 @@ export function garboAscend(after: string[], garbo: string): Task[] {
     {
       name: "Stooper",
       after: [...after, "Garbo", "Wish"],
-      do: () => cliExecute(`drink Sacramento wine`),
+      do: () => cliExecute(`drink stillsuit distillate`),
       completed: () => stooperDrunk(),
       outfit: { equip: $items`mafia pinky ring`, familiar: $familiar`Stooper` },
       effects: $effects`Ode to Booze`,
@@ -101,7 +114,7 @@ export function garboAscend(after: string[], garbo: string): Task[] {
       after: [...after, "Overdrink"],
       prepare: () => uneffect($effect`Drenched in Lava`),
       completed: () => myAdventures() === 0 && myInebriety() > inebrietyLimit(),
-      do: () => cliExecute("garbo ascend"),
+      do: () => cliExecute(args.garboAscendCmd),
       limit: { tries: 1 },
       tracking: "Garbo",
     },
@@ -144,7 +157,19 @@ export const AftercoreQuest: Quest = {
       do: () => cliExecute("breakfast"),
       limit: { tries: 1 },
     },
-    ...garboAscend(["Breakfast"], "garbo yachtzeechain ascend"),
+    {
+      name: "Floundry",
+      after: [],
+      completed: () => get("_floundryItemCreated") || !have($item`Clan VIP Lounge key`),
+      do: () => {
+        const startingClan = getClanName();
+        Clan.join(args.fishClan);
+        cliExecute(`acquire ${args.floundryItemAftercore}`);
+        Clan.join(startingClan);
+      },
+      limit: { tries: 1 },
+    },
+    ...garboAscend(["Breakfast", "Floundry"]),
     ...pvp(["Overdrunk"]),
   ],
 };

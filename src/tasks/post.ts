@@ -52,6 +52,15 @@ export function postQuest(runTasks: string[]): Quest {
         limit: { tries: 1 },
       },
       {
+        name: "garden",
+        after: runTasks,
+        completed: () => !have($item`packet of mushroom spores`),
+        do: (): void => {
+          use($item`packet of mushroom spores`);
+        },
+        limit: { tries: 1 },
+      },
+      {
         name: "Tune Moon",
         after: runTasks,
         completed: () =>
@@ -62,7 +71,7 @@ export function postQuest(runTasks: string[]): Quest {
       {
         name: "Duplicate",
         after: runTasks,
-        ready: () => have(args.duplicate),
+        ready: () => have(args.duplicate) && myAdventures() > 0,
         completed: () =>
           !have($familiar`Machine Elf`) || get("lastDMTDuplication") === myAscensions(),
         prepare: (): void => {
@@ -125,7 +134,7 @@ export function postQuest(runTasks: string[]): Quest {
           if (have($item`can of Rain-Doh`) && !have($item`Rain-Doh blue balls`))
             use($item`can of Rain-Doh`);
           set("valueOfAdventure", args.voa);
-          cliExecute("garbo yachtzeechain");
+          cliExecute(args.garboCmd);
         },
         limit: { tries: 1 },
         tracking: "Garbo",

@@ -5,18 +5,24 @@ import {
   buyUsingStorage,
   cliExecute,
   descToItem,
+  getClanName,
   getFuel,
   getWorkshed,
   hippyStoneBroken,
   itemAmount,
+  mallPrice,
+  myAscensions,
   myAdventures,
   myClass,
   myFamiliar,
   myLevel,
   myStorageMeat,
+  print,
+  pullsRemaining,
   runChoice,
   storageAmount,
   totalTurnsPlayed,
+  toInt,
   use,
   visitUrl,
 } from "kolmafia";
@@ -25,12 +31,14 @@ import {
   $effect,
   $familiar,
   $item,
+  $items,
   $location,
   $monster,
   $path,
   $skill,
   ascend,
   AsdonMartin,
+  Clan,
   ensureEffect,
   get,
   getTodaysHolidayWanderers,
@@ -39,7 +47,9 @@ import {
   Macro,
   Pantogram,
   prepareAscension,
+  realmAvailable,
   RetroCape,
+  set,
   SourceTerminal,
 } from "libram";
 import { ascended, Quest, Task } from "./structure";
@@ -78,6 +88,19 @@ const gear: Task[] = [
     do: () => cliExecute("pull lucky gold ring"),
     limit: { tries: 1 },
   },
+  {
+    name: "Floundry",
+    after: [],
+    completed: () =>
+      get("_floundryItemCreated") || !have($item`Clan VIP Lounge key`) || args.saveFloundry,
+    do: () => {
+      const startingClan = getClanName();
+      Clan.join(args.fishClan);
+      cliExecute(`acquire ${args.floundryItem}`);
+      Clan.join(startingClan);
+    },
+    limit: { tries: 1 },
+  },
   // {
   //   name: "Pointer Finger",
   //   after: [],
@@ -95,9 +118,9 @@ export const GyouQuest: Quest = {
       completed: () => ascended(),
       after: ["Aftercore/Overdrunk", "Aftercore/Fights"],
       do: (): void => {
-        prepareAscension({
-          eudora: "Our Daily Candles™ order form",
-        });
+        const garden = "packet of rock seeds";
+        const eudora = "Our Daily Candles™ order form";
+        prepareAscension({ garden, eudora });
 
         ascend({
           path: $path`Grey You`,
@@ -126,20 +149,49 @@ export const GyouQuest: Quest = {
       name: "Run",
       after: ["Ascend", ...gear.map((task) => task.name)],
       completed: () => step("questL13Final") > 11,
-      do: () => cliExecute("loopgyou tune=wombat"),
+      do: () => cliExecute(args.gyouCmd),
       limit: { tries: 1 },
       tracking: "Run",
     },
     {
-      name: "In-Run Farm",
+      name: "Tune Moon",
       after: ["Ascend", "Run", ...gear.map((task) => task.name)],
+      completed: () =>
+        !have($item`hewn moon-rune spoon`) || args.tune === undefined || get("moonTuned", false),
+      do: () => cliExecute(`spoon ${args.tune}`),
+      limit: { tries: 1 },
+    },
+    {
+      name: "In-Run Farm",
+      after: ["Ascend", "Run", "Tune Moon", ...gear.map((task) => task.name)],
       completed: () => myAdventures() <= 40 || myClass() !== $class`Grey Goo`,
       do: $location`Barf Mountain`,
       acquire: [{ item: $item`wad of used tape` }],
       prepare: (): void => {
+        print("In prepare");
         RetroCape.tuneToSkill($skill`Precision Shot`);
+        const ticket = $item`one-day ticket to Dinseylandfill`;
+        print("before buy/pull ticket");
+        if (!realmAvailable("stench") && (have(ticket) || pullsRemaining() > 0)) {
+          const TICKET_MAX_PRICE = 500000;
 
-        if (have($item`How to Avoid Scams`)) ensureEffect($effect`How to Scam Tourists`);
+          if (!have(ticket)) {
+            print("in buy");
+            buy(1, ticket, TICKET_MAX_PRICE);
+            cliExecute(`pull ${ticket.name}`);
+          }
+          use(ticket);
+        }
+        print("ticket bought and used");
+        if (realmAvailable("stench")) {
+          print("dinsey avail");
+        }
+        const scams = $item`How to Avoid Scams`;
+        if (!have(scams) && pullsRemaining() > 0) {
+          cliExecute(`pull ${scams.name}`);
+        }
+
+        if (have(scams)) ensureEffect($effect`How to Scam Tourists`);
 
         // Use only the first source terminal enhance, save the others for aftercore
         if (SourceTerminal.have() && get("_sourceTerminalEnhanceUses") === 0)

@@ -32,7 +32,10 @@ export const args = Args.create("loop", "A script for a full loop.", {
     help: "Skip all aftercore tasks and immediately jump the gash.",
     default: false,
   }),
-  pvp: Args.flag({ help: "If true, break hippy stone and do pvp.", default: false }),
+  pvp: Args.flag({
+    help: "If true, break hippy stone and do pvp.",
+    default: false,
+  }),
   abort: Args.string({
     help: "If given, abort during the prepare() step for the task with matching name.",
   }),
@@ -47,6 +50,46 @@ export const args = Args.create("loop", "A script for a full loop.", {
   tune: Args.string({
     help: "Moon sign to switch to after breaking prism",
     default: "wombat",
+  }),
+  garboCmd: Args.string({
+    setting: "looploop_garboCmd",
+    help: "cli command to run garbo after breaking prism",
+    default: "garbo",
+  }),
+  garboAscendCmd: Args.string({
+    setting: "looploop_garboAscendCmd",
+    help: "cli command to run garbo when ascending afterwards",
+    default: "garbo ascend workshed=trainset",
+  }),
+  freecandyOutfit: Args.string({
+    help: "outfit to wear for freecandtdotexe",
+    default: "Ceramic Suit",
+  }),
+  freecandyFamiliar: Args.string({
+    help: "familiar to use for freecandtdotexe",
+    default: "Jill-of-All-Trades",
+  }),
+  gyouCmd: Args.string({
+    setting: "looploop_gyouCmd",
+    help: "cli command to run loopgyou",
+    default: "loopgyou tune=wombat",
+  }),
+  fishClan: Args.string({
+    help: "clan to swap to grab carpe",
+    default: "Floundry",
+  }),
+  floundryItem: Args.string({
+    help: "Item to grab from the Floundry",
+    default: "carpe",
+  }),
+  floundryItemAftercore: Args.string({
+    help: "Item to grab from the Floundry",
+    default: "carpe",
+  }),
+  saveFloundry: Args.boolean({
+    setting: "looploop_saveFloundry",
+    help: "do not acquire floundry item",
+    default: true,
   }),
 });
 export function main(command?: string): void {

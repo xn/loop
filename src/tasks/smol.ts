@@ -47,9 +47,9 @@ export const SmolQuest: Quest = {
       completed: () => ascended(),
       after: ["Aftercore/Overdrunk", "Aftercore/Fights", "Legend Pizza"],
       do: (): void => {
-        prepareAscension({
-          eudora: "Our Daily Candles™ order form",
-        });
+        const garden = "packet of rock seeds";
+        const eudora = "Our Daily Candles™ order form";
+        prepareAscension({ garden, eudora });
 
         ascend({
           path: $path`A Shrunken Adventurer am I`,
